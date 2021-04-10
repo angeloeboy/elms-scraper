@@ -18,8 +18,8 @@ def login():
 
     data = {
         'authenticity_token': get_auth(),
-        'userid': str(sys.argv[0]),
-        'password': str(sys.argv[1])
+        'userid': str(sys.argv[1]),
+        'password': str(sys.argv[2])
     }
 
     s.post('https://elms.sti.edu/log_in/submit_from_portal', data=data)
@@ -32,12 +32,17 @@ def login():
 def main():
 
     soup = BeautifulSoup(login().content, 'html.parser')
+    getAssignments(soup)
+    getSubjects(soup)
+
+
+def getAssignments(soup):
+
     title = soup.select(
         '#centreColumn > aside > div > div:nth-child(2) > ul > div > ol')
-
     assignments = title[0].findAll("a")
-
     for assignment in assignments:
+
         subject = assignment.find("span").text
 
         if subject != "Collapse list":
@@ -45,6 +50,19 @@ def main():
                 "span", {"class": "small_number_block"}).text
             print(subject)
             print(number)
+
+
+def getSubjects(soup):
+    subjectsGroup = soup.select('#blockView')
+
+    subjects = subjectsGroup[0].findAll(
+        "div", {"class": "draggable"})
+
+    for subject in subjects:
+
+        subjectTitle = subject.find(
+            "h2", {"class": "class_name"}).text
+        print(subjectTitle)
 
 
 s = requests.Session()
